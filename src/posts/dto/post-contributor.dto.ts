@@ -1,0 +1,1 @@
+export class PostContributorDto { postId: string; contributorId: string; role: string; }

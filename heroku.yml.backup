@@ -1,0 +1,12 @@
+build:
+  docker:
+    web: Dockerfile
+
+release:
+  image: web
+  command:
+    - echo "Running migrations..."
+    - npm run migration:run
+
+run:
+  web: npm run start:prod

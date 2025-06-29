@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Print environment variables for debugging (remove in production if sensitive)
+echo "=== Environment Variables ==="
+echo "NODE_ENV: $NODE_ENV"
+echo "DATABASE_HOST: $DATABASE_HOST"
+echo "DATABASE_PORT: $DATABASE_PORT"
+echo "DATABASE_USER: $DATABASE_USER"
+echo "DATABASE_NAME: $DATABASE_NAME"
+echo "PORT: $PORT"
+echo "============================"
+
+# Export all environment variables to make them available to Node.js
+export NODE_ENV="${NODE_ENV:-production}"
+export DATABASE_HOST="${DATABASE_HOST:-db.prvethcysjvuxdhmiyjc.supabase.co}"
+export DATABASE_PORT="${DATABASE_PORT:-5432}"
+export DATABASE_USER="${DATABASE_USER:-postgres}"
+export DATABASE_PASSWORD="${DATABASE_PASSWORD:-SmartoDev@321}"
+export DATABASE_NAME="${DATABASE_NAME:-postgres}"
+export PORT="${PORT:-3000}"
+
+# Run migrations first
+echo "Running database migrations..."
+npm run migration:run
+
+# Check if migrations were successful
+if [ $? -eq 0 ]; then
+    echo "Migrations completed successfully"
+else
+    echo "Migration failed, but continuing..."
+fi
+
+# Start the application
+echo "Starting the application..."
+exec npm run start:prod
