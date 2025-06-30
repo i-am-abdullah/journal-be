@@ -220,10 +220,6 @@ export class PostService {
       take: limit,
     });
 
-    if (!data.length) {
-      throw new NotFoundException(`No posts found for user with id ${userId}`);
-    }
-
     return {
       data,
       meta: {
@@ -327,8 +323,6 @@ async getArchivedPublishedPosts(
     };
   }
 
-  // Add this method to your PostService class
-
 async findPostsByCategoryId(
   categoryId: string,
   page = 1,
@@ -344,7 +338,6 @@ async findPostsByCategoryId(
 }> {
   const skip = (page - 1) * limit;
 
-  // First check if category exists
   const category = await this.dataSource.manager.findOne(Category, { 
     where: { id: categoryId } 
   });
