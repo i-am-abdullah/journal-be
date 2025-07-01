@@ -7,7 +7,7 @@ import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
@@ -19,14 +19,14 @@ export class UsersController {
   }
 
   @Get('callback')
-async handleOrcidCallback(
-  @Query('code') code: string,
-  @Res() res: Response,
-): Promise<void> {
-  const { orcid } = await this.usersService.handleOrcidCallback(code);
-  const redirectUrl = this.usersService.getFrontendRedirectUrl(orcid);
-  res.redirect(redirectUrl);
-}
+  async handleOrcidCallback(
+    @Query('code') code: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { orcid } = await this.usersService.handleOrcidCallback(code);
+    const redirectUrl = this.usersService.getFrontendRedirectUrl(orcid);
+    res.redirect(redirectUrl);
+  }
 
   @UseGuards(AuthGuard)
   @Get()
@@ -56,9 +56,12 @@ async handleOrcidCallback(
 
   @UseGuards(AuthGuard)
   @Patch('orcid/:id')
-  async updateOrcId(@Param('id') id: string, @Body() orcid: string) {
+  async updateOrcId(
+    @Param('id') id: string,
+    @Body('orcid') orcId: string,
+  ) {
     try {
-      return await this.usersService.updateORCid(id, orcid);
+      return await this.usersService.updateORCid(id, orcId);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
