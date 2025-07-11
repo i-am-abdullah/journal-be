@@ -62,6 +62,21 @@ export class PostController {
     }
   }
 
+    @Get('volume/:volumeId')
+  async findPostsByVolumeId(
+    @Param('volumeId') volumeId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10'
+  ) {
+    try {
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+      return await this.postService.findPublishedPostsByVolumeId(volumeId, pageNum, limitNum);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    }
+  }
+
     @Get('details/:id')
   async findOne(@Param('id') id: string) {
     try {

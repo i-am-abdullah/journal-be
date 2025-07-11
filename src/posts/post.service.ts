@@ -11,6 +11,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { ApprovePostDto } from './dto/approve-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Category } from 'src/categories/entities/category.entity';
+import { VolumeService } from './volume.service';
 
 @Injectable()
 export class PostService {
@@ -18,16 +19,8 @@ export class PostService {
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
 
-    @InjectRepository(PostFile)
-    private readonly postFileRepository: Repository<PostFile>,
-
-    @InjectRepository(PostContributor)
-    private readonly postContributorRepository: Repository<PostContributor>,
-
-    @InjectRepository(Contributor)
-    private readonly contributorRepository: Repository<Contributor>,
-
     private readonly contributorsHelperService: ContributorsHelperService,
+    private readonly volumeService: VolumeService,
 
     private readonly dataSource: DataSource,
   ) { }
@@ -109,7 +102,7 @@ export class PostService {
     const skip = (page - 1) * limit;
 
     const [data, totalItems] = await this.postRepository.findAndCount({
-      relations: ['author', 'category', 'contributors', 'files'],
+      relations: ['author', 'category', 'volume', 'contributors', 'contributors.contributor', 'files'],
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
@@ -130,7 +123,7 @@ export class PostService {
   async findOne(id: string): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'category', 'contributors','contributors.contributor', 'files'],
+      relations: ['author', 'category','volume', 'contributors','contributors.contributor', 'files'],
     });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
@@ -214,7 +207,7 @@ export class PostService {
 
     const [data, totalItems] = await this.postRepository.findAndCount({
       where: { author: { id: userId } },
-      relations: ['author', 'category', 'contributors', 'files'],
+      relations: ['author', 'category', 'volume', 'contributors', 'contributors.contributor', 'files'],
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
@@ -233,18 +226,32 @@ export class PostService {
 
 
   async approvePost(id: string, approvePostDto: ApprovePostDto): Promise<Post> {
-    const post = await this.postRepository.findOne({ where: { id } });
+    const post = await this.postRepository.findOne({ where: { id } });    
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
     }
+
+    // Validate volume if provided
+    if (approvePostDto.volumeId) {
+      console.log("hello");
+      
+      const volume = await this.volumeService.findOne(approvePostDto.volumeId);
+      if (!volume) {
+        throw new NotFoundException(`Volume with id ${approvePostDto.volumeId} not found`);
+      }
+      post.volume = volume;
+    }
+
     post.approvedByAdmin = approvePostDto.approvedByAdmin;
-    post.published = true
+    post.published = true;
+    post.publishedAt = new Date(); // Set published date when approving
+
     if (approvePostDto.pdfUrl) {
       post.pdfUrl = approvePostDto.pdfUrl;
     }
+
     return this.postRepository.save(post);
   }
-
   async archiveOrUnarchivePost(id: string, archive: boolean): Promise<Post> {
   const post = await this.postRepository.findOne({ where: { id } });
   if (!post) {
@@ -271,7 +278,7 @@ async getArchivedPublishedPosts(
 
   const [data, totalItems] = await this.postRepository.findAndCount({
     where: { isArchive: true, published: true },
-    relations: ['author', 'category', 'contributors', 'files'],
+    relations: ['author', 'category', 'volume', 'contributors', 'files'],
     order: { createdAt: 'DESC' },
     skip,
     take: limit,
@@ -306,7 +313,7 @@ async getArchivedPublishedPosts(
 
     const [data, totalItems] = await this.postRepository.findAndCount({
       where:{published: true, isArchive:false},
-      relations: ['author', 'category', 'contributors', 'files'],
+      relations: ['author', 'category', 'volume', 'contributors', 'contributors.contributor', 'files'],
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
@@ -348,7 +355,7 @@ async findPostsByCategoryId(
 
   const [data, totalItems] = await this.postRepository.findAndCount({
     where: { category: { id: categoryId } },
-    relations: ['author', 'category', 'contributors', 'files'],
+    relations: ['author', 'category', 'contributors', 'volume', 'contributors.contributor', 'files'],
     order: { createdAt: 'DESC' },
     skip,
     take: limit,
@@ -394,9 +401,10 @@ async findPublishedPostsByCategoryId(
   const [data, totalItems] = await this.postRepository.findAndCount({
     where: { 
       category: { id: categoryId },
-      published: true 
+      published: true,
+      isArchive:false
     },
-    relations: ['author', 'category', 'contributors', 'files'],
+    relations: ['author', 'category','contributors.contributor', 'volume', 'contributors', 'files'],
     order: { createdAt: 'DESC' },
     skip,
     take: limit,
@@ -413,5 +421,44 @@ async findPublishedPostsByCategoryId(
     },
   };
 }
-}
 
+ async findPublishedPostsByVolumeId(
+    volumeId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: Post[],
+    meta: {
+      page: number,
+      limit: number,
+      totalItems: number,
+      totalPages: number,
+    }
+  }> {
+    const skip = (page - 1) * limit;
+
+    const volume = await this.volumeService.findOne(volumeId);
+    if (!volume) {
+      throw new NotFoundException(`Volume with id ${volumeId} not found`);
+    }
+
+    const [data, totalItems] = await this.postRepository.findAndCount({
+      where: { volume: { id: volumeId }, published:true, isArchive:false },
+      relations: ['author', 'category', 'volume', 'contributors', 'volume', 'contributors.contributor', 'files'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
+    };
+ 
+}
+}

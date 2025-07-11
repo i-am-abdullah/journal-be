@@ -10,6 +10,7 @@ export interface ContributorInput {
 export class CreatePostDto {
   title: string;
   slug: string;
+  keywords?:string;
   imageUrl?: string;
   abstract?: string;
   excerpt?: string;

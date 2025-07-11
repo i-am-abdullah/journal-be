@@ -12,6 +12,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { PostContributor } from './post-contributor.entity';
 import { PostFile } from './post-file.entity';
+import { Volume } from './volume.entity';
 
 @Entity('posts')
 export class Post {
@@ -23,6 +24,9 @@ export class Post {
 
   @Column({ type: 'varchar', unique: true, nullable: false })
   slug: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  keywords: string;
 
   @Column({ type: 'varchar', nullable: true })
   imageUrl: string;
@@ -55,6 +59,10 @@ export class Post {
   @ManyToOne(() => Category, (category) => category.posts, { nullable: false, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category: Category;
+  
+  @ManyToOne(() => Volume, (volume) => volume.posts, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'volume_id' })
+  volume: Volume;
 
   @OneToMany(() => PostContributor, (pc) => pc.post)
   contributors: PostContributor[];
