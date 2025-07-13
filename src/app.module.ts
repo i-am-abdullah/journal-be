@@ -11,6 +11,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { PostModule } from './posts/post.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { join } from 'path';
+import { EditorialMembersModule } from './editorial-members/editorial-members.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { join } from 'path';
     UsersModule,
     CategoriesModule,
     PostModule,
-    FileUploadModule
+    FileUploadModule,
+    EditorialMembersModule
   ],
   controllers: [AppController],
   providers: [AppService],
