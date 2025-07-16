@@ -19,14 +19,6 @@ export class EditorialMembersService {
 
   async create(createDto: CreateEditorialMemberDto): Promise<EditorialMember> {
     try {
-      // Check if member with same name already exists
-      const existingMember = await this.editorialMemberRepository.findOne({ 
-        where: { name: createDto.name } 
-      });
-      if (existingMember) {
-        throw new ConflictException(`Editorial member with name "${createDto.name}" already exists`);
-      }
-
       const editorialMember = this.editorialMemberRepository.create(createDto);
       return this.editorialMemberRepository.save(editorialMember);
     } catch (error) {
@@ -53,16 +45,6 @@ export class EditorialMembersService {
 
   async update(id: string, updateDto: UpdateEditorialMemberDto): Promise<EditorialMember> {
     const editorialMember = await this.findOne(id);
-
-    // Check if updating name to an existing name
-    if (updateDto.name && updateDto.name !== editorialMember.name) {
-      const existingMember = await this.editorialMemberRepository.findOne({ 
-        where: { name: updateDto.name } 
-      });
-      if (existingMember) {
-        throw new ConflictException(`Editorial member with name "${updateDto.name}" already exists`);
-      }
-    }
 
     Object.assign(editorialMember, updateDto);
     return this.editorialMemberRepository.save(editorialMember);

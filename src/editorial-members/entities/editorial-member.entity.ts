@@ -11,20 +11,8 @@ export class EditorialMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  name: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  location: string;
-
-  @Column({ type: 'varchar', nullable: false })
-  education: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  affiliation: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  areasOfExpertise: string;
+  @Column({ type: 'varchar', nullable:true })
+  members: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
