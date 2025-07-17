@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column, CreateDateColumn } from 'typeorm';
 import { Post } from './post.entity';
 import { Contributor } from 'src/contributors/entities/contributor.entity';
 
@@ -20,4 +20,7 @@ export class PostContributor {
 
   @Column({ type: 'varchar', nullable: false })
   role: string;
+  
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 }

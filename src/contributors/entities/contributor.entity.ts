@@ -21,7 +21,7 @@ export class Contributor {
   @Column({ type: 'varchar', nullable: true })
   affiliation: string | null;
 
-  @Column({ type: 'varchar', length: 19, unique: true, nullable: true })
+  @Column({ type: 'varchar', length: 19, nullable: true })
   orcidId: string | null;
 
   @Column({ type: 'text', nullable: true })

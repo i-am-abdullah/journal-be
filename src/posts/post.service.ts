@@ -123,7 +123,7 @@ export class PostService {
   async findOne(id: string): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'category','volume', 'contributors','contributors.contributor', 'files'],
+      relations: ['author', 'category', 'volume', 'contributors', 'contributors.contributor', 'files'],
     });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
@@ -226,7 +226,7 @@ export class PostService {
 
 
   async approvePost(id: string, approvePostDto: ApprovePostDto): Promise<Post> {
-    const post = await this.postRepository.findOne({ where: { id } });    
+    const post = await this.postRepository.findOne({ where: { id } });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
     }
@@ -234,7 +234,7 @@ export class PostService {
     // Validate volume if provided
     if (approvePostDto.volumeId) {
       console.log("hello");
-      
+
       const volume = await this.volumeService.findOne(approvePostDto.volumeId);
       if (!volume) {
         throw new NotFoundException(`Volume with id ${approvePostDto.volumeId} not found`);
@@ -253,47 +253,47 @@ export class PostService {
     return this.postRepository.save(post);
   }
   async archiveOrUnarchivePost(id: string, archive: boolean): Promise<Post> {
-  const post = await this.postRepository.findOne({ where: { id } });
-  if (!post) {
-    throw new NotFoundException(`Post with id ${id} not found`);
+    const post = await this.postRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException(`Post with id ${id} not found`);
+    }
+
+    post.isArchive = archive;
+    return this.postRepository.save(post);
   }
 
-  post.isArchive = archive;
-  return this.postRepository.save(post);
-}
-
-async getArchivedPublishedPosts(
-  page = 1,
-  limit = 10,
-): Promise<{
-  data: Post[],
-  meta: {
-    page: number,
-    limit: number,
-    totalItems: number,
-    totalPages: number,
-  }
-}> {
-  const skip = (page - 1) * limit;
-
-  const [data, totalItems] = await this.postRepository.findAndCount({
-    where: { isArchive: true, published: true },
-    relations: ['author', 'category', 'volume', 'contributors', 'files'],
-    order: { createdAt: 'DESC' },
-    skip,
-    take: limit,
-  });
-
-  return {
-    data,
+  async getArchivedPublishedPosts(
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: Post[],
     meta: {
-      page,
-      limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    },
-  };
-}
+      page: number,
+      limit: number,
+      totalItems: number,
+      totalPages: number,
+    }
+  }> {
+    const skip = (page - 1) * limit;
+
+    const [data, totalItems] = await this.postRepository.findAndCount({
+      where: { isArchive: true, published: true },
+      relations: ['author', 'category', 'volume', 'contributors', 'files'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
+    };
+  }
 
 
 
@@ -312,7 +312,7 @@ async getArchivedPublishedPosts(
     const skip = (page - 1) * limit;
 
     const [data, totalItems] = await this.postRepository.findAndCount({
-      where:{published: true, isArchive:false},
+      where: { published: true, isArchive: false },
       relations: ['author', 'category', 'volume', 'contributors', 'contributors.contributor', 'files'],
       order: { createdAt: 'DESC' },
       skip,
@@ -330,99 +330,99 @@ async getArchivedPublishedPosts(
     };
   }
 
-async findPostsByCategoryId(
-  categoryId: string,
-  page = 1,
-  limit = 10,
-): Promise<{
-  data: Post[],
-  meta: {
-    page: number,
-    limit: number,
-    totalItems: number,
-    totalPages: number,
-  }
-}> {
-  const skip = (page - 1) * limit;
-
-  const category = await this.dataSource.manager.findOne(Category, { 
-    where: { id: categoryId } 
-  });
-  
-  if (!category) {
-    throw new NotFoundException(`Category with id ${categoryId} not found`);
-  }
-
-  const [data, totalItems] = await this.postRepository.findAndCount({
-    where: { category: { id: categoryId } },
-    relations: ['author', 'category', 'contributors', 'volume', 'contributors.contributor', 'files'],
-    order: { createdAt: 'DESC' },
-    skip,
-    take: limit,
-  });
-
-  return {
-    data,
+  async findPostsByCategoryId(
+    categoryId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: Post[],
     meta: {
-      page,
-      limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-      // category: category.name, // Optional: include category name in response
-    },
-  };
-}
+      page: number,
+      limit: number,
+      totalItems: number,
+      totalPages: number,
+    }
+  }> {
+    const skip = (page - 1) * limit;
 
-// Optional: Get only published posts by category
-async findPublishedPostsByCategoryId(
-  categoryId: string,
-  page = 1,
-  limit = 10,
-): Promise<{
-  data: Post[],
-  meta: {
-    page: number,
-    limit: number,
-    totalItems: number,
-    totalPages: number,
+    const category = await this.dataSource.manager.findOne(Category, {
+      where: { id: categoryId }
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with id ${categoryId} not found`);
+    }
+
+    const [data, totalItems] = await this.postRepository.findAndCount({
+      where: { category: { id: categoryId } },
+      relations: ['author', 'category', 'contributors', 'volume', 'contributors.contributor', 'files'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        // category: category.name, // Optional: include category name in response
+      },
+    };
   }
-}> {
-  const skip = (page - 1) * limit;
 
-  // First check if category exists
-  const category = await this.dataSource.manager.findOne(Category, { 
-    where: { id: categoryId } 
-  });
-  
-  if (!category) {
-    throw new NotFoundException(`Category with id ${categoryId} not found`);
-  }
-
-  const [data, totalItems] = await this.postRepository.findAndCount({
-    where: { 
-      category: { id: categoryId },
-      published: true,
-      isArchive:false
-    },
-    relations: ['author', 'category','contributors.contributor', 'volume', 'contributors', 'files'],
-    order: { createdAt: 'DESC' },
-    skip,
-    take: limit,
-  });
-
-  return {
-    data,
+  // Optional: Get only published posts by category
+  async findPublishedPostsByCategoryId(
+    categoryId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: Post[],
     meta: {
-      page,
-      limit,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-      // category: category.name, // Optional: include category name in response
-    },
-  };
-}
+      page: number,
+      limit: number,
+      totalItems: number,
+      totalPages: number,
+    }
+  }> {
+    const skip = (page - 1) * limit;
 
- async findPublishedPostsByVolumeId(
+    // First check if category exists
+    const category = await this.dataSource.manager.findOne(Category, {
+      where: { id: categoryId }
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with id ${categoryId} not found`);
+    }
+
+    const [data, totalItems] = await this.postRepository.findAndCount({
+      where: {
+        category: { id: categoryId },
+        published: true,
+        isArchive: false
+      },
+      relations: ['author', 'category', 'contributors.contributor', 'volume', 'contributors', 'files'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        // category: category.name, // Optional: include category name in response
+      },
+    };
+  }
+
+  async findPublishedPostsByVolumeId(
     volumeId: string,
     page = 1,
     limit = 10,
@@ -443,7 +443,7 @@ async findPublishedPostsByCategoryId(
     }
 
     const [data, totalItems] = await this.postRepository.findAndCount({
-      where: { volume: { id: volumeId }, published:true, isArchive:false },
+      where: { volume: { id: volumeId }, published: true },
       relations: ['author', 'category', 'volume', 'contributors', 'volume', 'contributors.contributor', 'files'],
       order: { createdAt: 'DESC' },
       skip,
@@ -459,6 +459,6 @@ async findPublishedPostsByCategoryId(
         totalPages: Math.ceil(totalItems / limit),
       },
     };
- 
-}
+
+  }
 }

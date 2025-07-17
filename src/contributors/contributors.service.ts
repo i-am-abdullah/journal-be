@@ -19,32 +19,22 @@ export class ContributorsHelperService {
     private readonly contributorRepository: Repository<Contributor>,
   ) {}
 
-  async createContributors(inputs: CreateContributorInput[]): Promise<Contributor[]> {
-    const contributors: Contributor[] = [];
+async createContributors(inputs: CreateContributorInput[]): Promise<Contributor[]> {
+  const contributors: Contributor[] = [];
+  const seen = new Set<string>();
 
-    for (const input of inputs) {
-      let contributor: Contributor | null = null;
+  for (const input of inputs) {
+    const key = `${input.fullName}||${input.email}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
 
-      if (input.orcidId) {
-        contributor = await this.contributorRepository.findOne({ where: { orcidId: input.orcidId } });
-      }
-
-      if (!contributor && input.fullName && input.email) {
-        contributor = await this.contributorRepository.findOne({
-          where: { fullName: input.fullName, email: input.email },
-        });
-      }
-
-      if (!contributor) {
-        contributor = this.contributorRepository.create(input);
-        contributor = await this.contributorRepository.save(contributor);
-      }
-
-      contributors.push(contributor);
-    }
-
-    return contributors;
+    const contributor = this.contributorRepository.create(input);
+    const saved = await this.contributorRepository.save(contributor);
+    contributors.push(saved);
   }
+
+  return contributors;
+}
 
     async findOne(id: string): Promise<any> {
       const contributor = await this.contributorRepository.findOne({
