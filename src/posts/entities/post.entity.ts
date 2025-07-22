@@ -27,6 +27,9 @@ export class Post {
 
   @Column({ type: 'varchar', nullable: true })
   keywords: string;
+  
+  @Column({ type: 'varchar', nullable: true })
+  pageNum: string;
 
   @Column({ type: 'varchar', nullable: true })
   imageUrl: string;

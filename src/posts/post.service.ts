@@ -231,9 +231,7 @@ export class PostService {
       throw new NotFoundException(`Post with id ${id} not found`);
     }
 
-    // Validate volume if provided
     if (approvePostDto.volumeId) {
-      console.log("hello");
 
       const volume = await this.volumeService.findOne(approvePostDto.volumeId);
       if (!volume) {
@@ -244,10 +242,13 @@ export class PostService {
 
     post.approvedByAdmin = approvePostDto.approvedByAdmin;
     post.published = true;
-    post.publishedAt = new Date(); // Set published date when approving
+    post.publishedAt = new Date()
 
     if (approvePostDto.pdfUrl) {
       post.pdfUrl = approvePostDto.pdfUrl;
+    }
+    if(approvePostDto.pageNum){
+      post.pageNum = approvePostDto.pageNum
     }
 
     return this.postRepository.save(post);

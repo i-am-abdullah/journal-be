@@ -1,6 +1,7 @@
 
 export class ApprovePostDto {
   approvedByAdmin: boolean;
-  pdfUrl?: string;
+  pdfUrl: string;
   volumeId?: string;
+  pageNum?: string;
 }
